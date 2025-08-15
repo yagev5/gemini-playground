@@ -243,7 +243,22 @@ body {
 
 /* Config Panel */
 #config-container {
-    display: none; /* Implement logic to show/hide */
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 320px;
+    height: 100%;
+    background-color: var(--surface-color);
+    box-shadow: -2px 0 10px var(--shadow-color);
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+}
+
+#config-container.active {
+    transform: translateX(0);
 }
 
 /* Video & Screen Share (keep minimal for now) */
@@ -261,4 +276,50 @@ body {
 #video-container video, #screen-container video {
     width: 100%;
     display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    #app {
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .top-bar {
+        padding: var(--spacing-sm);
+    }
+
+    #logs-container {
+        padding: var(--spacing-md);
+    }
+
+    .bottom-bar {
+        padding: var(--spacing-sm);
+    }
+
+    .message-bar {
+        flex-wrap: wrap;
+    }
+
+    #message-input {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .audio-visualizers {
+        grid-template-columns: 1fr;
+    }
+
+    #config-container {
+        width: 100%;
+    }
 }
