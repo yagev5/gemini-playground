@@ -114,6 +114,10 @@ const client = new MultimodalLiveClient();
  * @param {string} [type='system'] - The type of the message (system, user, ai).
  */
 function logMessage(message, type = 'system') {
+    if (type !== 'user' && type !== 'ai') {
+        return; // Only log user and AI messages
+    }
+
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', type);
 
@@ -125,11 +129,8 @@ function logMessage(message, type = 'system') {
     const emoji = document.createElement('span');
     emoji.classList.add('emoji');
     switch (type) {
-        case 'system':
-            emoji.textContent = '⚙️';
-            break;
         case 'user':
-            emoji.textContent = '🫵';
+            emoji.textContent = '😊';
             break;
         case 'ai':
             emoji.textContent = '🤖';
