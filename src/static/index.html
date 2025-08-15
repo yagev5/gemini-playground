@@ -1,0 +1,106 @@
+<!--
+//Author: ChrisKyle
+//Project: https://github.com/ViaAnthroposBenevolentia/gemini-2-live-api-demo
+//MIT License : https://github.com/ViaAnthroposBenevolentia/gemini-2-live-api-demo/blob/main/LICENSE
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang="title">Gemini Multimodal Live API Client</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="top-bar">
+            <div class="api-key-container">
+                <input type="password" id="api-key" placeholder="请输入 Gemini API 密钥" data-lang="apiKeyPlaceholder" />
+                <button id="config-toggle" class="material-symbols-outlined">settings</button>
+            </div>
+            <button id="connect-button" data-lang="connectButton">连接</button>
+        </header>
+
+        <main id="logs-container"></main>
+
+        <footer class="bottom-bar">
+            <div class="message-bar">
+                <input type="text" id="message-input" placeholder="输入消息..." data-lang="messageInputPlaceholder">
+                <div class="actions">
+                    <button id="send-button" data-lang="sendButton">发送</button>
+                    <button id="mic-button">
+                        <span id="mic-icon" class="material-symbols-outlined">mic</span>
+                    </button>
+                    <button id="camera-button">
+                        <span id="camera-icon" class="material-symbols-outlined">videocam</span>
+                    </button>
+                    <button id="screen-button">
+                        <span id="screen-icon" class="material-symbols-outlined">screen_share</span>
+                    </button>
+                </div>
+            </div>
+            <div class="audio-visualizers">
+                <div class="visualizer-container">
+                    <label data-lang="inputAudioLabel">输入音频</label>
+                    <div id="input-audio-visualizer"></div>
+                </div>
+                <div class="visualizer-container">
+                    <label data-lang="outputAudioLabel">输出音频</label>
+                    <div id="audio-visualizer"></div>
+                </div>
+            </div>
+        </footer>
+
+        <div id="config-container" class="hidden-mobile">
+            <div class="config-wrapper">
+                <div class="setting-container">
+                    <span class="setting-label" data-lang="languageLabel">Language: </span>
+                    <select id="language-select">
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label" data-lang="soundLabel">Sound: </span>
+                    <select id="voice-select">
+                        <option value="Puck" data-lang="puckVoice">Puck (Male)</option>
+                        <option value="Charon" data-lang="charonVoice">Charon (Male)</option>
+                        <option value="Fenrir" data-lang="fenrirVoice">Fenrir (Male)</option>
+                        <option value="Kore" data-lang="koreVoice">Kore (Female)</option>
+                        <option value="Aoede" selected data-lang="aoedeVoice">Aoede (Female)</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label" data-lang="responseTypeLabel">Response Type: </span>
+                    <select id="response-type-select">
+                        <option value="text" data-lang="textResponseType">Text</option>
+                        <option value="audio" selected data-lang="audioResponseType">Audio</option>
+                    </select>
+                </div>
+                <div class="setting-container">
+                    <span class="setting-label" data-lang="videoFpsLabel">Video FPS: </span>
+                    <input type="number" id="fps-input" placeholder="Video FPS" value="1" min="1" max="30" step="1"/>
+                    <span class="fps-help" data-lang="fpsHelp">Higher FPS need more network bandwidth</span>
+                </div>
+                <textarea id="system-instruction" placeholder="Enter custom system instructions..." rows="6" data-lang="systemInstructionPlaceholder"></textarea>
+                <button id="apply-config" data-lang="applyConfigButton">Confirm</button>
+            </div>
+        </div>
+        
+        <div id="video-container" style="display: none;">
+            <video id="preview" playsinline autoplay muted></video>
+            <div class="video-controls">
+                <button id="stop-video" data-lang="stopVideoButton">Stop Video</button>
+                <button id="flip-camera">
+                    <span class="material-symbols-outlined">flip_camera_ios</span>
+                </button>
+            </div>
+        </div>
+        <div id="screen-container" style="display: none;">
+            <video id="screen-preview" playsinline autoplay muted></video>
+            <button class="close-button material-symbols-outlined">close</button>
+        </div>
+    </div>
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>
