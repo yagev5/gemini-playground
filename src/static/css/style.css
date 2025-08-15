@@ -1,15 +1,45 @@
 :root {
     --primary-color: #2979ff;
-    --background-color: #f4f6f8;
-    --surface-color: #ffffff;
-    --border-color: #e0e0e0;
-    --text-color: #212121;
-    --text-secondary-color: #757575;
-    --shadow-color: rgba(0, 0, 0, 0.08);
     --border-radius: 12px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 24px;
+
+    --day-bg-gradient: linear-gradient(to top, #d9afd9 0%, #97d9e1 100%);
+    --day-surface-bg: rgba(255, 255, 255, 0.7);
+    --day-text-color: #212121;
+    --day-secondary-text-color: #5f6368;
+    --day-border-color: rgba(209, 213, 219, 0.3);
+    --day-shadow-color: rgba(0, 0, 0, 0.1);
+    --day-input-bg: rgba(255, 255, 255, 0.8);
+
+    --night-bg-gradient: linear-gradient(-20deg, #2b5876 0%, #4e4376 100%);
+    --night-surface-bg: rgba(41, 42, 45, 0.7);
+    --night-text-color: #f5f5f5;
+    --night-secondary-text-color: #a0a0a0;
+    --night-border-color: rgba(107, 114, 128, 0.3);
+    --night-shadow-color: rgba(0, 0, 0, 0.2);
+    --night-input-bg: rgba(20, 21, 23, 0.5);
+}
+
+body {
+    --bg-gradient: var(--day-bg-gradient);
+    --surface-bg: var(--day-surface-bg);
+    --text-color: var(--day-text-color);
+    --secondary-text-color: var(--day-secondary-text-color);
+    --border-color: var(--day-border-color);
+    --shadow-color: var(--day-shadow-color);
+    --input-bg: var(--day-input-bg);
+}
+
+body.dark-mode {
+    --bg-gradient: var(--night-bg-gradient);
+    --surface-bg: var(--night-surface-bg);
+    --text-color: var(--night-text-color);
+    --secondary-text-color: var(--night-secondary-text-color);
+    --border-color: var(--night-border-color);
+    --shadow-color: var(--night-shadow-color);
+    --input-bg: var(--night-input-bg);
 }
 
 * {
@@ -18,9 +48,17 @@
     padding: 0;
 }
 
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: var(--background-color);
+    background: var(--bg-gradient);
+    background-size: 200% 200%;
+    animation: gradient-animation 15s ease infinite;
     color: var(--text-color);
     display: flex;
     justify-content: center;
@@ -30,9 +68,12 @@ body {
 }
 
 #app {
-    background-color: var(--surface-color);
+    background-color: var(--surface-bg);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     border-radius: var(--border-radius);
-    box-shadow: 0 4px 20px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px 0 var(--shadow-color);
     width: 100%;
     max-width: 800px;
     height: 90vh;
@@ -54,10 +95,10 @@ body {
     display: flex;
     flex-grow: 1;
     align-items: center;
-    background-color: var(--background-color);
+    background-color: var(--input-bg);
     border-radius: var(--border-radius);
     padding: 0 var(--spacing-sm);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
     transition: border-color 0.3s ease;
 }
 
@@ -74,11 +115,28 @@ body {
     font-size: 14px;
 }
 
+#theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--secondary-text-color);
+    padding: var(--spacing-sm);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+#theme-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
 #config-toggle {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--text-secondary-color);
+    color: var(--secondary-text-color);
 }
 
 #connect-button {
@@ -160,8 +218,9 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    background-color: var(--background-color);
+    background-color: var(--input-bg);
     border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
 }
@@ -198,7 +257,7 @@ body {
 }
 
 #mic-button, #camera-button, #screen-button {
-    background-color: var(--text-secondary-color);
+    background-color: var(--secondary-text-color);
 }
 
 #mic-button.recording {

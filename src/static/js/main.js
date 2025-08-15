@@ -32,6 +32,7 @@ const apiKeyInput = document.getElementById('api-key');
 const voiceSelect = document.getElementById('voice-select');
 const languageSelect = document.getElementById('language-select');
 const fpsInput = document.getElementById('fps-input');
+const themeToggle = document.getElementById('theme-toggle');
 const configToggle = document.getElementById('config-toggle');
 const configContainer = document.getElementById('config-container');
 const systemInstructionInput = document.getElementById('system-instruction');
@@ -45,7 +46,13 @@ const savedVoice = localStorage.getItem('gemini_voice');
 const savedLanguage = localStorage.getItem('gemini_language');
 const savedFPS = localStorage.getItem('video_fps');
 const savedSystemInstruction = localStorage.getItem('system_instruction');
+const savedTheme = localStorage.getItem('theme');
 
+// Apply saved theme on load
+if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeToggle.textContent = 'dark_mode';
+}
 
 if (savedApiKey) {
     apiKeyInput.value = savedApiKey;
@@ -91,6 +98,14 @@ configToggle.addEventListener('click', () => {
 applyConfigButton.addEventListener('click', () => {
     configContainer.classList.toggle('active');
     configToggle.classList.toggle('active');
+});
+
+// Handle theme toggle
+themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    themeToggle.textContent = isDarkMode ? 'dark_mode' : 'light_mode';
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
 });
 
 // State variables
