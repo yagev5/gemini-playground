@@ -63,6 +63,8 @@ languages.forEach(lang => {
 
 if (savedLanguage) {
     languageSelect.value = savedLanguage;
+} else {
+    languageSelect.value = 'cmn-CN';
 }
 
 // Set initial language
