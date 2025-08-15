@@ -30,6 +30,12 @@ B站，YouTube，抖音，公众号 全网同名。转载请注明作者。
 6. 点击 <b>Deploy Project</b>
 7. 部署成功后获得域名，点开即用。域名同样可以作为Chat API的代理使用。
 
+## Vercel 部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fyagev5%2Fgemini-playground)
+
+点击上面的按钮，按照 Vercel 的引导操作即可。
+
 ## Cloudflare Worker 部署
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tech-shrimp/gemini-playground)
