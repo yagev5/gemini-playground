@@ -20,6 +20,7 @@
         <header class="top-bar">
             <div class="api-key-container">
                 <input type="password" id="api-key" placeholder="" data-lang="apiKeyPlaceholder" />
+                <div id="connection-status" class="disconnected"></div>
                 <button id="config-toggle" class="material-symbols-outlined">settings</button>
             </div>
             <button id="theme-toggle" class="material-symbols-outlined">light_mode</button>
@@ -86,7 +87,10 @@
                     <span class="fps-help" data-lang="fpsHelp">Higher FPS need more network bandwidth</span>
                 </div>
                 <textarea id="system-instruction" placeholder="Enter custom system instructions..." rows="6" data-lang="systemInstructionPlaceholder"></textarea>
-                <button id="apply-config" data-lang="applyConfigButton">Confirm</button>
+                <button id="apply-config" data-lang="applyConfigButton">确定</button>
+            </div>
+            <div class="log-display-container">
+                <button id="export-logs" data-lang="exportLogsButton">导出日志</button>
             </div>
         </div>
         

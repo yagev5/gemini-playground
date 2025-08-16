@@ -39,6 +39,9 @@ const systemInstructionInput = document.getElementById('system-instruction');
 systemInstructionInput.value = CONFIG.SYSTEM_INSTRUCTION.TEXT;
 const applyConfigButton = document.getElementById('apply-config');
 const responseTypeSelect = document.getElementById('response-type-select');
+const connectionStatusIndicator = document.getElementById('connection-status');
+const applicationLogs = document.getElementById('application-logs');
+const exportLogsButton = document.getElementById('export-logs');
 
 // Load saved values from localStorage
 const savedApiKey = localStorage.getItem('gemini_api_key');
@@ -127,39 +130,47 @@ const client = new MultimodalLiveClient();
 /**
  * Logs a message to the UI.
  * @param {string} message - The message to log.
- * @param {string} [type='system'] - The type of the message (system, user, ai).
+ * @param {string} [type='system'] - The type of the message (system, user, ai, error).
  */
 function logMessage(message, type = 'system') {
-    if (type !== 'user' && type !== 'ai') {
-        return; // Only log user and AI messages
+    const timestamp = new Date().toLocaleTimeString();
+    const fullMessage = `[${timestamp}] [${type.toUpperCase()}]: ${message}`;
+
+    // Log to main logs container
+    if (type === 'user' || type === 'ai') {
+        const logEntry = document.createElement('div');
+        logEntry.classList.add('log-entry', type);
+
+        const timestampSpan = document.createElement('span');
+        timestampSpan.classList.add('timestamp');
+        timestampSpan.textContent = timestamp;
+        logEntry.appendChild(timestampSpan);
+
+        const emoji = document.createElement('span');
+        emoji.classList.add('emoji');
+        switch (type) {
+            case 'user':
+                emoji.textContent = '😊';
+                break;
+            case 'ai':
+                emoji.textContent = '🤖';
+                break;
+        }
+        logEntry.appendChild(emoji);
+
+        const messageText = document.createElement('span');
+        messageText.textContent = message;
+        logEntry.appendChild(messageText);
+
+        logsContainer.appendChild(logEntry);
+        logsContainer.scrollTop = logsContainer.scrollHeight;
     }
 
-    const logEntry = document.createElement('div');
-    logEntry.classList.add('log-entry', type);
-
-    const timestamp = document.createElement('span');
-    timestamp.classList.add('timestamp');
-    timestamp.textContent = new Date().toLocaleTimeString();
-    logEntry.appendChild(timestamp);
-
-    const emoji = document.createElement('span');
-    emoji.classList.add('emoji');
-    switch (type) {
-        case 'user':
-            emoji.textContent = '😊';
-            break;
-        case 'ai':
-            emoji.textContent = '🤖';
-            break;
-    }
-    logEntry.appendChild(emoji);
-
-    const messageText = document.createElement('span');
-    messageText.textContent = message;
-    logEntry.appendChild(messageText);
-
-    logsContainer.appendChild(logEntry);
-    logsContainer.scrollTop = logsContainer.scrollHeight;
+    // Log to application logs in settings
+    const logEntryApp = document.createElement('div');
+    logEntryApp.textContent = fullMessage;
+    applicationLogs.appendChild(logEntryApp);
+    applicationLogs.scrollTop = applicationLogs.scrollHeight;
 }
 
 /**
@@ -319,14 +330,16 @@ async function connectToWebsocket() {
         await client.connect(config,apiKeyInput.value);
         isConnected = true;
         await resumeAudioContext();
-        connectButton.textContent = 'Disconnect';
-        connectButton.classList.add('connected');
-        messageInput.disabled = false;
-        sendButton.disabled = false;
-        micButton.disabled = false;
-        cameraButton.disabled = false;
-        screenButton.disabled = false;
-        logMessage('Connected to Gemini Multimodal Live API', 'system');
+    connectButton.textContent = 'Disconnect';
+    connectButton.classList.add('connected');
+    messageInput.disabled = false;
+    sendButton.disabled = false;
+    micButton.disabled = false;
+    cameraButton.disabled = false;
+    screenButton.disabled = false;
+    connectionStatusIndicator.classList.remove('disconnected', 'connecting');
+    connectionStatusIndicator.classList.add('connected');
+    logMessage('Connected to Gemini Multimodal Live API', 'system');
     } catch (error) {
         const errorMessage = error.message || 'Unknown error';
         Logger.error('Connection error:', error);
@@ -339,6 +352,8 @@ async function connectToWebsocket() {
         micButton.disabled = true;
         cameraButton.disabled = true;
         screenButton.disabled = true;
+        connectionStatusIndicator.classList.remove('connected', 'connecting');
+        connectionStatusIndicator.classList.add('disconnected');
     }
 }
 
@@ -364,6 +379,8 @@ function disconnectFromWebsocket() {
     micButton.disabled = true;
     cameraButton.disabled = true;
     screenButton.disabled = true;
+    connectionStatusIndicator.classList.remove('connected', 'connecting');
+    connectionStatusIndicator.classList.add('disconnected');
     logMessage('Disconnected from server', 'system');
     
     if (videoManager) {
@@ -446,16 +463,17 @@ client.on('turncomplete', () => {
 client.on('error', (error) => {
     if (error instanceof ApplicationError) {
         Logger.error(`Application error: ${error.message}`, error);
+        logMessage(`Application error: ${error.message}`, 'error');
     } else {
         Logger.error('Unexpected error', error);
+        logMessage(`Unexpected error: ${error.message}`, 'error');
     }
-    logMessage(`Error: ${error.message}`, 'system');
 });
 
 client.on('message', (message) => {
     if (message.error) {
         Logger.error('Server error:', message.error);
-        logMessage(`Server error: ${message.error}`, 'system');
+        logMessage(`Server error: ${message.error}`, 'error');
     }
 });
 
@@ -472,6 +490,8 @@ connectButton.addEventListener('click', () => {
     if (isConnected) {
         disconnectFromWebsocket();
     } else {
+        connectionStatusIndicator.classList.remove('disconnected');
+        connectionStatusIndicator.classList.add('connecting');
         connectToWebsocket();
     }
 });
@@ -480,6 +500,7 @@ messageInput.disabled = true;
 sendButton.disabled = true;
 micButton.disabled = true;
 connectButton.textContent = 'Connect';
+connectionStatusIndicator.classList.add('disconnected');
 
 /**
  * Handles the video toggle. Starts or stops video streaming.
@@ -597,3 +618,16 @@ function stopScreenSharing() {
 
 screenButton.addEventListener('click', handleScreenShare);
 screenButton.disabled = true;
+
+exportLogsButton.addEventListener('click', () => {
+    const logs = applicationLogs.innerText;
+    const blob = new Blob([logs], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gemini_logs_${new Date().toISOString()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});

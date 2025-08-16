@@ -21,5 +21,7 @@
     "sendButton": "发送",
     "inputAudioLabel": "输入音频",
     "outputAudioLabel": "输出音频",
-    "stopVideoButton": "停止视频"
+    "stopVideoButton": "停止视频",
+    "logsTitle": "应用日志",
+    "exportLogsButton": "导出日志"
 }

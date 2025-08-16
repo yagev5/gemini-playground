@@ -20,5 +20,7 @@
     "sendButton": "Send",
     "inputAudioLabel": "Input Audio",
     "outputAudioLabel": "Output Audio",
-    "stopVideoButton": "Stop Video"
+    "stopVideoButton": "Stop Video",
+    "logsTitle": "Application Logs",
+    "exportLogsButton": "Export Logs"
 }

@@ -19,7 +19,7 @@
     --night-secondary-text-color: #a0a0a0;
     --night-border-color: rgba(107, 114, 128, 0.3);
     --night-shadow-color: rgba(0, 0, 0, 0.2);
-    --night-input-bg: rgba(20, 21, 23, 0.5);
+    --night-input-bg: rgba(20, 21, 23, 0.7); /* Adjusted for better contrast */
 }
 
 body {
@@ -30,16 +30,18 @@ body {
     --border-color: var(--day-border-color);
     --shadow-color: var(--day-shadow-color);
     --input-bg: var(--day-input-bg);
+    --surface-color: rgba(255, 255, 255, 0.9); /* Default for config-container */
 }
 
 body.dark-mode {
     --bg-gradient: var(--night-bg-gradient);
-    --surface-bg: var(--night-surface-bg);
+    --surface-bg: rgba(20, 21, 23, 0.85);
     --text-color: var(--night-text-color);
     --secondary-text-color: var(--night-secondary-text-color);
     --border-color: var(--night-border-color);
     --shadow-color: var(--night-shadow-color);
     --input-bg: var(--night-input-bg);
+    --surface-color: rgba(30, 31, 34, 0.95);
 }
 
 * {
@@ -100,6 +102,38 @@ body {
     padding: 0 var(--spacing-sm);
     border: 1px solid var(--border-color);
     transition: border-color 0.3s ease;
+}
+
+#connection-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: var(--spacing-sm);
+    transition: background-color 0.3s ease;
+}
+
+#connection-status.connecting {
+    background-color: #f39c12; /* Orange */
+    animation: breathing 2s ease-in-out infinite;
+}
+
+#connection-status.connected {
+    background-color: #2ecc71; /* Green */
+}
+
+#connection-status.disconnected {
+    background-color: #e74c3c; /* Red */
+}
+
+@keyframes breathing {
+    0%, 100% {
+        transform: scale(0.8);
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7);
+    }
+    50% {
+        transform: scale(1);
+        box-shadow: 0 0 10px 5px rgba(243, 156, 18, 0.3);
+    }
 }
 
 .api-key-container:focus-within {
@@ -306,17 +340,97 @@ body {
     top: 50%;
     left: 50%;
     width: 90%;
-    max-width: 400px;
+    max-width: 450px;
     background-color: var(--surface-color);
     box-shadow: 0 8px 30px var(--shadow-color);
     transform: translate(-50%, -50%) scale(0.9);
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     z-index: 1000;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
     overflow-y: auto;
     border-radius: var(--border-radius);
     opacity: 0;
     pointer-events: none;
+}
+
+.config-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    background-color: var(--surface-bg);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+}
+
+.setting-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-container:last-of-type {
+    border-bottom: none;
+}
+
+.setting-label {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+#config-container input[type="number"],
+#config-container select,
+#config-container textarea {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: var(--spacing-sm);
+    color: var(--text-color);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+#config-container input[type="number"]:focus,
+#config-container select:focus,
+#config-container textarea:focus {
+    border-color: var(--primary-color);
+}
+
+#config-container textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+#apply-config {
+    background-color: #2979ff;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    font-size: 14px;
+}
+
+#export-logs {
+    background-color: #2979ff;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    width: auto;
+    font-size: 14px;
+}
+
+#apply-config:hover, #export-logs:hover {
+    background-color: #1c6ef3;
 }
 
 #config-container.active {
@@ -324,6 +438,35 @@ body {
     opacity: 1;
     pointer-events: auto;
 }
+
+.log-display-container {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+}
+
+.log-display-container h3 {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-color);
+}
+
+.log-output {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--text-color);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
 
 /* Video & Screen Share (keep minimal for now) */
 #video-container, #screen-container {
