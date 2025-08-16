@@ -31,7 +31,6 @@ const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
 const apiKeyInput = document.getElementById('api-key');
 const voiceSelect = document.getElementById('voice-select');
 const languageSelect = document.getElementById('language-select');
-const modelSelect = document.getElementById('model-select');
 const fpsInput = document.getElementById('fps-input');
 const themeToggle = document.getElementById('theme-toggle');
 const configToggle = document.getElementById('config-toggle');
@@ -45,7 +44,6 @@ const responseTypeSelect = document.getElementById('response-type-select');
 const savedApiKey = localStorage.getItem('gemini_api_key');
 const savedVoice = localStorage.getItem('gemini_voice');
 const savedLanguage = localStorage.getItem('gemini_language');
-const savedModel = localStorage.getItem('gemini_model');
 const savedFPS = localStorage.getItem('video_fps');
 const savedSystemInstruction = localStorage.getItem('system_instruction');
 const savedTheme = localStorage.getItem('theme');
@@ -63,16 +61,6 @@ if (savedVoice) {
     voiceSelect.value = savedVoice;
 }
 
-CONFIG.API.MODELS.forEach(model => {
-    const option = document.createElement('option');
-    option.value = model;
-    option.textContent = model.replace('models/', '');
-    modelSelect.appendChild(option);
-});
-
-if (savedModel) {
-    modelSelect.value = savedModel;
-}
 
 languages.forEach(lang => {
     const option = document.createElement('option');
@@ -304,11 +292,10 @@ async function connectToWebsocket() {
     localStorage.setItem('gemini_api_key', apiKeyInput.value);
     localStorage.setItem('gemini_voice', voiceSelect.value);
     localStorage.setItem('gemini_language', languageSelect.value);
-    localStorage.setItem('gemini_model', modelSelect.value);
     localStorage.setItem('system_instruction', systemInstructionInput.value);
 
     const config = {
-        model: modelSelect.value,
+        model: 'models/gemini-live-2.5-flash-preview',
         generationConfig: {
             responseModalities: responseTypeSelect.value,
             speechConfig: {

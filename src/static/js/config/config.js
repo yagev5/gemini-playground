@@ -1,14 +1,7 @@
 export const CONFIG = {
     API: {
         VERSION: 'v1beta',
-        MODELS: [
-            'models/gemini-live-2.5-flash-preview',
-            'models/gemini-2.0-flash',
-            'models/gemini-2.5-pro',
-            'models/gemini-2.5-flash',
-            'models/gemini-1.5-flash-latest',
-            'models/gemini-1.5-pro-latest'
-        ]
+        MODELS: []
     },
     // You can change the system instruction to your liking
     SYSTEM_INSTRUCTION: {
