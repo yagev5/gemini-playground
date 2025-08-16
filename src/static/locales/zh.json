@@ -2,6 +2,7 @@
     "title": "Gemini 多模态实时 API 客户端",
     "apiKeyPlaceholder": "请输入 Gemini API 密钥",
     "languageLabel": "语言: ",
+    "modelLabel": "模型: ",
     "soundLabel": "声音: ",
     "puckVoice": "Puck (男声)",
     "charonVoice": "Charon (男声)",
