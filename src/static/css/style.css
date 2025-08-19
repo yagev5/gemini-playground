@@ -1,613 +1,546 @@
+/* src/static/css/style.css */
+
 :root {
-    --primary-color: #4285f4;
-    --secondary-color: #34a853;
-    --danger-color: #ea4335;
-    --background-color: #f0f0f0;
-    --surface-color: #fff;
-    --border-color: #ccc;
-    --text-color: #333;
-    --text-secondary: #666;
-    --shadow-color: rgba(0, 0, 0, 0.1);
-    --border-radius: 8px;
+    --primary-color: #2979ff;
+    --border-radius: 12px;
     --spacing-sm: 8px;
     --spacing-md: 16px;
     --spacing-lg: 24px;
-    --primary-color-rgb: 66, 133, 244;
+
+    --day-bg-gradient: linear-gradient(to top, #d9afd9 0%, #97d9e1 100%);
+    --day-surface-bg: rgba(255, 255, 255, 0.7);
+    --day-text-color: #212121;
+    --day-secondary-text-color: #5f6368;
+    --day-border-color: rgba(209, 213, 219, 0.3);
+    --day-shadow-color: rgba(0, 0, 0, 0.1);
+    --day-input-bg: rgba(255, 255, 255, 0.8);
+
+    --night-bg-gradient: linear-gradient(-20deg, #2b5876 0%, #4e4376 100%);
+    --night-surface-bg: rgba(28, 29, 31, 0.75); /* 调暗背景 */
+    --night-text-color: #e8e6e3; /* 柔和文本颜色 */
+    --night-secondary-text-color: #9e9e9e; /* 调整次要文本颜色 */
+    --night-border-color: rgba(107, 114, 128, 0.2); /* 降低边框亮度 */
+    --night-shadow-color: rgba(0, 0, 0, 0.3); /* 加深阴影 */
+    --night-input-bg: rgba(30, 31, 33, 0.6); /* 调整输入框背景 */
 }
 
 body {
-    font-family: sans-serif;
+    --bg-gradient: var(--day-bg-gradient);
+    --surface-bg: var(--day-surface-bg);
+    --text-color: var(--day-text-color);
+    --secondary-text-color: var(--day-secondary-text-color);
+    --border-color: var(--day-border-color);
+    --shadow-color: var(--day-shadow-color);
+    --input-bg: var(--day-input-bg);
+}
+
+body.dark-mode {
+    --bg-gradient: var(--night-bg-gradient);
+    --surface-bg: var(--night-surface-bg);
+    --text-color: var(--night-text-color);
+    --secondary-text-color: var(--night-secondary-text-color);
+    --border-color: var(--night-border-color);
+    --shadow-color: var(--night-shadow-color);
+    --input-bg: var(--night-input-bg);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes gradient-animation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gradient);
+    background-size: 400% 400%; /* 调整背景尺寸 */
+    animation: gradient-animation 20s ease infinite; /* 调整动画时间 */
+    color: var(--text-color);
+    display: flex;
     justify-content: center;
     align-items: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
     min-height: 100vh;
-    background-color: #f0f0f0;
+    padding: var(--spacing-md);
 }
 
 #app {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    max-width: 1000px;
-}
-
-#logs-container {
-    border: 1px solid #ccc;
-    height: 300px;
-    overflow-y: auto;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-    scroll-behavior: smooth;
-}
-
-#logs-container:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.log-entry {
-    font-size: 0.9em;
-    margin-bottom: 5px;
-}
-
-.log-entry.system {
-    color: #080; /* Green for system messages */
-}
-
-.log-entry.user {
-    color: #008; /* Blue for user messages */
-}
-
-.log-entry.ai {
-    color: #800; /* Red for AI messages */
-}
-
-.log-entry .timestamp {
-    color: #888;
-    margin-right: 5px;
-}
-
-.log-entry .emoji {
-    margin-right: 5px;
-}
-
-#message-input {
-    width: calc(100% - 100px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    margin-right: 10px;
-}
-
-#send-button, #mic-button {
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4285f4;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
+    background-color: var(--surface-bg);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 12px 48px 0 var(--shadow-color); /* 调整阴影 */
+    width: 100%;
+    max-width: 800px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 }
 
-#send-button:hover, #mic-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* Top Bar */
+.top-bar {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-md) var(--spacing-lg); /* 增加左右内边距 */
+    border-bottom: 1px solid var(--border-color);
+    gap: var(--spacing-md);
+    min-height: 60px; /* 确保顶部栏有最小高度 */
 }
 
-#send-button:active, #mic-button:active {
-    transform: translateY(1px);
+.api-key-container {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
 }
 
-#send-button::after, #mic-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
+.api-key-container:focus-within {
+    border-color: var(--primary-color);
+}
+
+#api-key {
+    flex-grow: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg);
+    outline: none;
+    font-size: 15px; /* 稍微增大字体 */
+    color: var(--text-color); /* 确保文本颜色与主题匹配 */
+}
+
+#theme-toggle, #config-toggle, #mcp-config-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--secondary-text-color);
+    padding: var(--spacing-sm);
     border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-#send-button:active::after, #mic-button:active::after {
-    width: 200px;
-    height: 200px;
+#theme-toggle:hover, #config-toggle:hover, #mcp-config-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
 }
 
-#audio-visualizer {
+#connect-button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+#connect-button:hover {
+    background-color: #1c6ef3;
+    transform: translateY(-1px); /* 悬停时轻微上浮 */
+}
+
+#connect-button.connected {
+    background-color: #f44336;
+}
+
+/* Logs Container */
+#logs-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    /* 自定义滚动条样式 */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: var(--primary-color) transparent; /* Firefox */
+}
+
+#logs-container::-webkit-scrollbar {
+    width: 8px; /* Chrome, Safari, Edge */
+}
+
+#logs-container::-webkit-scrollbar-track {
+    background: transparent; /* Chrome, Safari, Edge */
+}
+
+#logs-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color); /* Chrome, Safari, Edge */
+    border-radius: 10px; /* Chrome, Safari, Edge */
+    border: 2px solid transparent; /* Chrome, Safari, Edge */
+    background-clip: content-box; /* Chrome, Safari, Edge */
+}
+
+.log-entry {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    max-width: 80%;
+    position: relative;
+    padding-left: 30px;
+}
+
+.log-entry .emoji {
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+.log-entry .message-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.log-entry .timestamp {
+    font-size: 11px;
+    color: var(--secondary-text-color);
+    margin-bottom: 4px;
+    opacity: 0.8;
+}
+
+.log-entry span:not(.emoji):not(.timestamp) {
+    background-color: var(--surface-bg);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    line-height: 1.5;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    border: 1px solid var(--border-color);
+}
+
+.log-entry.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.log-entry.user span:not(.emoji):not(.timestamp) {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* 用户消息气泡更深的阴影 */
+    border: 1px solid var(--primary-color); /* 用户消息气泡边框 */
+}
+
+/* Bottom Bar */
+.bottom-bar {
+    padding: var(--spacing-md) var(--spacing-lg); /* 增加左右内边距 */
+    border-top: 1px solid var(--border-color);
+    min-height: 80px; /* 确保底部栏有最小高度 */
+    display: flex; /* 使内容居中 */
+    flex-direction: column; /* 垂直排列 */
+    justify-content: center; /* 垂直居中 */
+}
+
+.message-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: var(--input-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+#message-input {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: var(--spacing-sm);
+    font-size: 16px;
+    color: var(--text-color); /* 确保文本颜色与主题匹配 */
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+#send-button, #mic-button, #camera-button, #screen-button {
+    border: none;
+    border-radius: var(--border-radius);
+    color: #fff;
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+#send-button {
+    background-color: var(--primary-color);
+    width: auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+#mic-button, #camera-button, #screen-button {
+    background-color: var(--secondary-text-color);
+}
+
+#mic-button:hover, #camera-button:hover, #screen-button:hover {
+    background-color: #757575; /* 悬停时颜色变深 */
+    transform: translateY(-1px); /* 悬停时轻微上浮 */
+}
+
+#mic-button.recording {
+    background-color: #f44336;
+}
+
+/* Audio Visualizers */
+.audio-visualizers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.visualizer-container {
+    background-color: var(--surface-bg);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+}
+
+.visualizer-container label {
+    font-size: 12px;
+    color: var(--text-secondary-color);
+    margin-bottom: var(--spacing-sm);
+    display: block;
+}
+
+#input-audio-visualizer, #audio-visualizer {
     width: 100%;
-    height: 20px;
-    background-color: #eee;
-    margin-top: 10px;
-    border-radius: 4px;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
     overflow: hidden;
 }
 
 .audio-bar {
     height: 100%;
-    background-color: #4285f4;
     width: 0%;
-}
-
-/* Add a simple animation for the audio bars */
-@keyframes audio-pulse {
-    0% {
-        transform: scaleY(1);
-    }
-    50% {
-        transform: scaleY(1.5);
-    }
-    100% {
-        transform: scaleY(1);
-    }
-}
-
-.audio-bar.active {
-    animation: audio-pulse 0.5s infinite;
-}
-
-#connect-button {
-    padding: 10px 20px;
-    margin-bottom: 10px;
-    border: none;
-    border-radius: 4px;
-    background-color: #34a853;
-    color: #fff;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-#connect-button.connected {
-    background-color: #ea4335;
-}
-
-#video-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 480px;
-    z-index: 100;
-}
-
-#video-container video {
-    width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-.video-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 101;
-}
-
-#stop-video {
-    background: #ea4335;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#stop-video:hover {
-    background: #d33426;
-}
-
-#flip-camera {
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#camera-button {
-    background: #4285f4;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-#camera-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#camera-button:active {
-    transform: translateY(1px);
-}
-
-#camera-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-#camera-button:active::after {
-    width: 200px;
-    height: 200px;
-}
-
-#camera-button.active {
-    background: #ea4335;
-}
-
-#frame-preview {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 120px;
-    height: 90px;
-    border: 2px solid rgba(66, 133, 244, 0.8);
-    border-radius: 4px;
-    background: #000;
-    z-index: 2;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-#frame-preview:hover {
-    transform: scale(1.1);
-    border-color: #4285f4;
-}
-
-#frame-preview.enlarged {
-    width: 480px;
-    height: 360px;
-    bottom: 50%;
-    right: 50%;
-    transform: translate(50%, 50%);
-    z-index: 4;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-}
-
-/* Add overlay when preview is enlarged */
-#frame-preview.enlarged::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
-}
-
-/* Improve video controls visibility */
-.video-controls {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#video-container:hover .video-controls {
-    opacity: 1;
-}
-
-#screen-button {
-    background: #4285f4;
-    color: white;
-    border: none;
-    padding: 8px;
-    border-radius: 50%;
-    cursor: pointer;
-    margin-left: 8px;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-#screen-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-#screen-button:active {
-    transform: translateY(1px);
-}
-
-#screen-button::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.3s ease, height 0.3s ease;
-}
-
-#screen-button:active::after {
-    width: 200px;
-    height: 200px;
-}
-
-#screen-button.active {
-    background: #ea4335;
-}
-
-/* Add styles for screen preview */
-#screen-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #000;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    width: 480px;
-    height: 360px;
-    transition: all 0.3s ease;
-    display: none;
-    z-index: 1000;
-}
-
-#screen-preview {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-    display: block;
-}
-
-/* Add hover effect */
-#screen-container:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-}
-
-/* Add a close button */
-#screen-container .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#screen-container:hover .close-button {
-    opacity: 1;
-}
-
-#screen-container .close-button:hover {
-    background: rgba(0, 0, 0, 0.8);
-}
-
-.audio-visualizers {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.visualizer-container {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.visualizer-container label {
-    font-size: 0.8em;
-    color: #666;
-}
-
-#input-audio-visualizer,
-#audio-visualizer {
-    width: 100%;
-    height: 20px;
-    background-color: #eee;
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-#input-audio-visualizer .audio-bar {
-    height: 100%;
-    background-color: #34a853; /* Green for input audio */
-    width: 0%;
-}
-
-#audio-visualizer .audio-bar {
-    height: 100%;
-    background-color: #4285f4; /* Blue for output audio */
-    width: 0%;
-}
-
-/* Update the animation for both visualizers */
-@keyframes audio-pulse {
-    0% {
-        transform: scaleY(1);
-    }
-    50% {
-        transform: scaleY(1.5);
-    }
-    100% {
-        transform: scaleY(1);
-    }
-}
-
-.audio-bar.active {
-    animation: audio-pulse 0.5s infinite;
-}
-
-.settings {
-    margin-bottom: 10px;
-    display: flex;
-    gap: 10px;
-}
-
-#api-key {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 300px;
-}
-
-#voice-select  #response-type-select{
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
- 
-/* Configuration panel */
-#config-container {
-    background: var(--surface-color);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    display: none;
-}
-
-#config-container.active {
-    display: block;
-}
-.config-wrapper {
-    display: grid;
-    gap: var(--spacing-md);
-    max-width: 600px;
-    margin: 0 auto;
-}
-#apply-config {
-    padding: var(--spacing-md);
     background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    border-radius: 5px;
+    transition: width 0.1s ease;
 }
 
-#apply-config:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#system-instruction {
-    padding: var(--spacing-md);
+/* Config Panel */
+#config-container, #mcp-config-container { /* 同时应用于设置和MCP设置面板 */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 90%;
+    max-width: 500px; /* 加宽面板 */
+    max-height: 80vh; /* 增加最大高度 */
+    background-color: var(--surface-bg);
+    box-shadow: 0 12px 40px var(--shadow-color); /* 调整阴影 */
+    transform: translate(-50%, -50%) scale(0.9);
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    z-index: 1000;
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    border-radius: calc(var(--border-radius) + 4px); /* 调整圆角 */
+    opacity: 0;
+    pointer-events: none;
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: 14px;
+    backdrop-filter: blur(12px) saturate(180%); /* 增强模糊效果 */
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    color: var(--text-color);
 }
 
-/* Responsive styles */
-@media (max-width: 768px) {
-    #app {
-        padding: var(--spacing-sm);
-        width: 96%;
-    }
+#config-container.active, #mcp-config-container.active { /* 同时应用于设置和MCP设置面板 */
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
 
-    .hidden-mobile {
-        display: none;
-    }
-
-    #config-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1000;
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-        overflow-y: auto;
-        display: block;
-        background: var(--surface-color);
-        padding: var(--spacing-lg);
-    }
-
-    #config-container.active {
-        transform: translateX(0);
-    }
-
-    .logs-wrapper {
-        max-height: 30vh;
-    }
-
-    #logs-container {
-        max-height: calc(30vh - 50px);
-    }
-
-    .input-controls {
-        position: sticky;
-        bottom: 0;
-        background: var(--surface-color);
-        padding: var(--spacing-md);
-        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-        z-index: 100;
-    }
-
-    .action-buttons {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    #video-container {
-        width: 60%;
-        max-height: 40vh;
-        bottom: 0;
-        right: 0;
-    }
-
-    #screen-container {
-        width: 100%;
-        height: 50vh;
-        bottom: 0;
-        left: 0;
-        right: auto;
-    }
+#mcp-config-container h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-color);
 }
 
 .setting-container {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
 .setting-label {
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 14px;
+    color: var(--secondary-text-color);
 }
 
+#config-container select, #config-container input[type="number"] {
+    width: 60%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+}
 
-.fps-help {
-    color: #666;
-    font-size: 12px;
+#config-container textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+    resize: vertical;
+    margin-bottom: var(--spacing-md);
+}
+
+.button-group {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+#config-container button {
+    flex: 1;
+    padding: var(--spacing-sm);
+    border: none;
+    border-radius: var(--border-radius);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+#apply-config {
+    background-color: var(--primary-color);
+}
+
+#export-log {
+    background-color: #6c757d;
+}
+
+.config-section .input-group {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.config-section input[type="text"] {
+    flex-grow: 1;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.config-section input[type="text"]:focus {
+    border-color: var(--primary-color);
+}
+
+.config-section button {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-color);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.config-section button:hover {
+    background-color: #1c6ef3;
+    transform: translateY(-1px);
+}
+
+#mcp-config-container #apply-mcp-config {
+    width: 100%;
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    font-size: 16px;
+}
+
+/* Video & Screen Share (keep minimal for now) */
+#video-container, #screen-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 20px var(--shadow-color);
+    overflow: hidden;
+    z-index: 100;
+}
+
+#video-container video, #screen-container video {
+    width: 100%;
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    #config-container, #mcp-config-container { /* 响应式调整 */
+        max-width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        padding: var(--spacing-md);
+    }
+
+    #app {
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .top-bar {
+        padding: var(--spacing-sm);
+    }
+
+    #logs-container {
+        padding: var(--spacing-md);
+    }
+
+    .bottom-bar {
+        padding: var(--spacing-sm);
+    }
+
+    .message-bar {
+        flex-wrap: wrap;
+    }
+
+    #message-input {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .audio-visualizers {
+        grid-template-columns: 1fr;
+    }
+
+    #config-container {
+        width: 90vw;
+    }
 }
