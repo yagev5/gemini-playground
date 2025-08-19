@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gemini-client-cache-v1';
+const CACHE_NAME = 'gemini-client-cache-v2';
 const urlsToCache = [
     '/',
     '/css/style.css',
