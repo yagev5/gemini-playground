@@ -134,14 +134,16 @@ body {
 }
 
 #connect-button {
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 8px 12px; /* 缩小内边距 */
     border: none;
     border-radius: var(--border-radius);
     background-color: var(--primary-color);
     color: #fff;
     cursor: pointer;
     font-weight: 500;
+    font-size: 14px; /* 缩小字体大小 */
     transition: background-color 0.3s ease;
+    white-space: nowrap; /* 防止文本换行 */
 }
 
 #connect-button:hover {
@@ -535,6 +537,12 @@ body {
 
     .top-bar {
         padding: var(--spacing-sm);
+        gap: var(--spacing-sm); /* 缩小顶部栏元素之间的间距 */
+    }
+
+    #connect-button {
+        padding: 6px 10px; /* 进一步缩小移动端按钮内边距 */
+        font-size: 12px; /* 进一步缩小移动端按钮字体大小 */
     }
 
     #logs-container {

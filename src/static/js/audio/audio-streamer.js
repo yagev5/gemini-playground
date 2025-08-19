@@ -173,7 +173,15 @@ export class AudioStreamer {
                     this.checkInterval = null;
                 }
             } else {
-                if (!this.checkInterval) {
+                // 如果队列为空但处理缓冲区有数据，尝试调度
+                if (this.processingBuffer.length > 0 && !this.checkInterval) {
+                    this.checkInterval = window.setInterval(() => {
+                        if (this.processingBuffer.length >= this.bufferSize) {
+                            this.scheduleNextBuffer();
+                        }
+                    }, 100);
+                } else if (!this.checkInterval) {
+                    // 如果没有数据，但流未完成，继续检查
                     this.checkInterval = window.setInterval(() => {
                         if (this.audioQueue.length > 0 || this.processingBuffer.length >= this.bufferSize) {
                             this.scheduleNextBuffer();
@@ -182,8 +190,9 @@ export class AudioStreamer {
                 }
             }
         } else {
-            const nextCheckTime = (this.scheduledTime - this.context.currentTime) * 1000;
-            setTimeout(() => this.scheduleNextBuffer(), Math.max(0, nextCheckTime - 50));
+            // 确保调度时间不会在过去
+            const delay = Math.max(0, (this.scheduledTime - this.context.currentTime) * 1000 - 50);
+            setTimeout(() => this.scheduleNextBuffer(), delay);
         }
     }
 
@@ -242,4 +251,4 @@ export class AudioStreamer {
             this.onComplete();
         }
     }
-} 
+}

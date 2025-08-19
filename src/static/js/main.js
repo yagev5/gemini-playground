@@ -439,7 +439,8 @@ client.on('close', (event) => {
 
 client.on('audio', async (data) => {
     try {
-        await resumeAudioContext();
+        // 确保 AudioContext 在接收到音频数据时被激活
+        await resumeAudioContext(); 
         const streamer = await ensureAudioInitialized();
         streamer.addPCM16(new Uint8Array(data));
     } catch (error) {

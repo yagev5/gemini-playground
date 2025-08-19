@@ -48,6 +48,8 @@ export class AudioRecorder {
             });
             
             this.audioContext = new AudioContext({ sampleRate: this.sampleRate });
+            // 确保 AudioContext 在启动时被激活
+            await this.audioContext.resume(); 
             this.source = this.audioContext.createMediaStreamSource(this.stream);
 
             // Load and initialize audio worklet
@@ -142,4 +144,4 @@ export class AudioRecorder {
             );
         }
     }
-} 
+}
