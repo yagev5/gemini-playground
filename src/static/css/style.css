@@ -373,25 +373,48 @@ body {
 }
 
 .setting-container {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: max-content 1fr;
     align-items: center;
     margin-bottom: var(--spacing-md);
+    gap: var(--spacing-md);
 }
 
 .setting-label {
     font-size: 14px;
     color: var(--secondary-text-color);
+    text-align: right;
+}
+
+#fps-input {
+    width: 4ch;
+}
+
+.fps-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.fps-help {
+    font-size: 14px; /* 调整字体大小 */
+    color: var(--secondary-text-color);
+    /* 移除 white-space, overflow, text-overflow 让其自然换行 */
 }
 
 #config-container select, #config-container input[type="number"] {
-    width: 60%;
+    width: auto; /* 自动宽度 */
+    min-width: 150px; /* 确保最小宽度 */
     padding: var(--spacing-sm);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     background-color: var(--input-bg);
     color: var(--text-color);
     outline: none;
+}
+
+.setting-container.fps-container {
+    grid-template-columns: max-content 1fr; /* 标签 | 输入框和帮助文本 */
 }
 
 #config-container textarea {

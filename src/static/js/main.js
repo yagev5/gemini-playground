@@ -74,6 +74,9 @@ languages.forEach(lang => {
 
 if (savedLanguage) {
     languageSelect.value = savedLanguage;
+} else {
+    // Set default to Mandarin Chinese (China) if no saved language
+    languageSelect.value = 'cmn-CN';
 }
 
 if (savedFPS) {
@@ -153,6 +156,18 @@ const client = new MultimodalLiveClient();
  * @param {string} [type='system'] - The type of the message (system, user, ai).
  */
 function logMessage(message, type = 'system') {
+    const allowedSystemMessages = [
+        'WebSocket 连接已打开',
+        '已连接到 Gemini 多模态实时 API',
+        '已与服务器断开连接',
+        '设置完成'
+    ];
+
+    if (type === 'system' && !allowedSystemMessages.includes(message)) {
+        Logger.info(message);
+        return;
+    }
+
     const logEntry = document.createElement('div');
     logEntry.classList.add('log-entry', type);
 
@@ -168,7 +183,7 @@ function logMessage(message, type = 'system') {
             emoji.textContent = '⚙️';
             break;
         case 'user':
-            emoji.textContent = '🫵';
+            emoji.textContent = '😊';
             break;
         case 'ai':
             emoji.textContent = '🤖';
