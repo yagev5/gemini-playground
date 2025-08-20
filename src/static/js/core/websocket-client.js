@@ -29,6 +29,14 @@ export class MultimodalLiveClient extends EventEmitter {
     }
 
     /**
+     * Sets the MCP manager for the tool manager.
+     * @param {MCPManager} mcpManager - The MCP manager instance.
+     */
+    setMCPManager(mcpManager) {
+        this.toolManager.setMCPManager(mcpManager);
+    }
+
+    /**
      * Logs a message with a timestamp and type. Emits a 'log' event.
      *
      * @param {string} type - The type of the log message (e.g., 'server.send', 'client.close').

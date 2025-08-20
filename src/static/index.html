@@ -25,7 +25,7 @@
             <button id="theme-toggle" class="material-symbols-outlined">light_mode</button>
             <button id="mcp-config-toggle" class="material-symbols-outlined">lan</button>
         </div>
-        <div id="config-container" class="active">
+        <div id="config-container">
             <div class="config-wrapper">
                 <div class="setting-container">
                     <span class="setting-label">语言: </span>
@@ -62,6 +62,35 @@
                     <button id="export-log">导出日志</button>
                 </div>
             </div>
+        </div>
+        <!-- MCP Config Container -->
+        <div id="mcp-config-container">
+            <h2>MCP 服务配置</h2>
+            <div class="mcp-services-list" id="mcp-services-list">
+                <!-- MCP services will be populated here -->
+            </div>
+            <div class="mcp-service-form">
+                <h3 id="mcp-form-title">添加新服务</h3>
+                <input type="hidden" id="mcp-service-id">
+                <div class="input-group">
+                    <label for="mcp-service-name">服务名称:</label>
+                    <input type="text" id="mcp-service-name" placeholder="输入服务名称">
+                </div>
+                <div class="input-group">
+                    <label for="mcp-service-description">描述:</label>
+                    <textarea id="mcp-service-description" placeholder="输入服务描述"></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="mcp-service-code">代码:</label>
+                    <textarea id="mcp-service-code" placeholder="粘贴MCP代码..."></textarea>
+                    <div class="code-validation" id="mcp-code-validation"></div>
+                </div>
+                <div class="button-group">
+                    <button id="mcp-save-service">保存</button>
+                    <button id="mcp-cancel-edit">取消</button>
+                </div>
+            </div>
+            <button id="apply-mcp-config">确认</button>
         </div>
         <div id="logs-container"></div>
         <div class="message-bar">

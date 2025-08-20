@@ -13,6 +13,13 @@ Free serverless deployment using Deno/Cloudflare Worker.
 Converts Gemini Chat API to the more universal OpenAI format, accessible directly within China.
 Compatible with AI programming, can be integrated with ChatBox and other AI clients.
 
+### New MCP (Model Context Protocol) Feature
+Support custom MCP services to easily extend model capabilities:
+- Add, edit, and delete MCP services through the web interface
+- Enable/disable specific MCP services individually
+- Use MCP services by pasting code
+- Code validation and error提示
+
 ## Deno Deployment (Recommended)
 
 0. Prepare a Gemini API Key [https://aistudio.google.com](https://aistudio.google.com) (Free)

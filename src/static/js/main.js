@@ -14,6 +14,7 @@ import { Logger } from './utils/logger.js';
 import { VideoManager } from './video/video-manager.js';
 import { ScreenRecorder } from './video/screen-recorder.js';
 import { languages } from './language-selector.js';
+import { MCPManager } from './mcp/mcp-manager.js';
 
 /**
  * @fileoverview Main entry point for the application.
@@ -50,6 +51,19 @@ const applyConfigButton = document.getElementById('apply-config');
 const exportLogButton = document.getElementById('export-log');
 const responseTypeSelect = document.getElementById('response-type-select');
 
+// MCP Elements
+const mcpConfigContainer = document.getElementById('mcp-config-container');
+const mcpServicesList = document.getElementById('mcp-services-list');
+const mcpServiceIdInput = document.getElementById('mcp-service-id');
+const mcpServiceNameInput = document.getElementById('mcp-service-name');
+const mcpServiceDescriptionInput = document.getElementById('mcp-service-description');
+const mcpServiceCodeInput = document.getElementById('mcp-service-code');
+const mcpCodeValidation = document.getElementById('mcp-code-validation');
+const mcpSaveServiceButton = document.getElementById('mcp-save-service');
+const mcpCancelEditButton = document.getElementById('mcp-cancel-edit');
+const mcpApplyConfigButton = document.getElementById('apply-mcp-config');
+const mcpFormTitle = document.getElementById('mcp-form-title');
+
 // Load saved values from localStorage
 const savedApiKey = localStorage.getItem('gemini_api_key');
 const savedVoice = localStorage.getItem('gemini_voice');
@@ -57,6 +71,8 @@ const savedLanguage = localStorage.getItem('gemini_language');
 const savedFPS = localStorage.getItem('video_fps');
 const savedSystemInstruction = localStorage.getItem('system_instruction');
 
+// Initialize MCP Manager
+const mcpManager = new MCPManager();
 
 if (savedApiKey) {
     apiKeyInput.value = savedApiKey;
@@ -98,14 +114,170 @@ themeToggle.addEventListener('click', () => {
     themeToggle.textContent = document.body.classList.contains('dark-mode') ? 'dark_mode' : 'light_mode';
 });
 
+// MCP Functions
+function renderMCPServices() {
+    mcpServicesList.innerHTML = '';
+    const services = mcpManager.getServices();
+    
+    if (services.length === 0) {
+        mcpServicesList.innerHTML = '<div class="no-services">暂无MCP服务</div>';
+        return;
+    }
+    
+    services.forEach(service => {
+        const serviceElement = document.createElement('div');
+        serviceElement.className = 'mcp-service-item';
+        serviceElement.innerHTML = `
+            <div class="mcp-service-info">
+                <div class="mcp-service-name">${service.name}</div>
+                <div class="mcp-service-description">${service.description || '无描述'}</div>
+            </div>
+            <div class="mcp-service-actions">
+                <button class="mcp-toggle-service" data-id="${service.id}" data-enabled="${service.enabled}">
+                    ${service.enabled ? '禁用' : '启用'}
+                </button>
+                <button class="mcp-edit-service" data-id="${service.id}">编辑</button>
+                <button class="mcp-delete-service" data-id="${service.id}">删除</button>
+            </div>
+        `;
+        mcpServicesList.appendChild(serviceElement);
+    });
+    
+    // Add event listeners to action buttons
+    document.querySelectorAll('.mcp-toggle-service').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            const enabled = e.target.dataset.enabled === 'true';
+            if (enabled) {
+                mcpManager.disableService(id);
+                e.target.textContent = '启用';
+                e.target.dataset.enabled = 'false';
+            } else {
+                mcpManager.enableService(id);
+                e.target.textContent = '禁用';
+                e.target.dataset.enabled = 'true';
+            }
+        });
+    });
+    
+    document.querySelectorAll('.mcp-edit-service').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            const service = mcpManager.getService(id);
+            if (service) {
+                mcpServiceIdInput.value = service.id;
+                mcpServiceNameInput.value = service.name;
+                mcpServiceDescriptionInput.value = service.description || '';
+                // Only load code if it exists in the service object
+                if (service.code) {
+                    mcpServiceCodeInput.value = service.code;
+                }
+                mcpFormTitle.textContent = '编辑服务';
+            }
+        });
+    });
+    
+    document.querySelectorAll('.mcp-delete-service').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            if (confirm('确定要删除此服务吗？')) {
+                mcpManager.removeService(id);
+                renderMCPServices();
+            }
+        });
+    });
+}
+
+function resetMCPForm() {
+    mcpServiceIdInput.value = '';
+    mcpServiceNameInput.value = '';
+    mcpServiceDescriptionInput.value = '';
+    mcpServiceCodeInput.value = '';
+    mcpFormTitle.textContent = '添加新服务';
+    mcpCodeValidation.textContent = '';
+    mcpCodeValidation.className = 'code-validation';
+}
+
+// Validate MCP code
+mcpServiceCodeInput.addEventListener('input', () => {
+    const code = mcpServiceCodeInput.value;
+    if (code.trim() === '') {
+        mcpCodeValidation.textContent = '';
+        mcpCodeValidation.className = 'code-validation';
+        return;
+    }
+    
+    const result = mcpManager.validateCode(code);
+    if (result.valid) {
+        mcpCodeValidation.textContent = '代码有效';
+        mcpCodeValidation.className = 'code-validation valid';
+    } else {
+        mcpCodeValidation.textContent = `代码无效: ${result.error}`;
+        mcpCodeValidation.className = 'code-validation invalid';
+    }
+});
+
+// Save or update MCP service
+mcpSaveServiceButton.addEventListener('click', () => {
+    const id = mcpServiceIdInput.value;
+    const name = mcpServiceNameInput.value.trim();
+    const description = mcpServiceDescriptionInput.value.trim();
+    const code = mcpServiceCodeInput.value;
+    
+    if (!name) {
+        alert('请输入服务名称');
+        return;
+    }
+    
+    if (!code) {
+        alert('请输入服务代码');
+        return;
+    }
+    
+    // Validate code before saving
+    const validationResult = mcpManager.validateCode(code);
+    if (!validationResult.valid) {
+        alert(`代码无效: ${validationResult.error}`);
+        return;
+    }
+    
+    if (id) {
+        // Update existing service
+        mcpManager.updateService(id, name, description, code);
+    } else {
+        // Add new service
+        mcpManager.addService(name, description, code);
+    }
+    
+    // Refresh services list and reset form
+    renderMCPServices();
+    resetMCPForm();
+});
+
+// Cancel editing
+mcpCancelEditButton.addEventListener('click', () => {
+    resetMCPForm();
+});
+
 mcpConfigToggle.addEventListener('click', () => {
-    // Placeholder for MCP config toggle functionality
-    logMessage('MCP config toggle clicked', 'system');
+    // Show MCP config panel
+    mcpConfigContainer.classList.toggle('active');
+    mcpConfigToggle.classList.toggle('active');
+    // Refresh services list when opening
+    if (mcpConfigContainer.classList.contains('active')) {
+        renderMCPServices();
+        resetMCPForm();
+    }
 });
 
 applyConfigButton.addEventListener('click', () => {
     configContainer.classList.toggle('active');
     configToggle.classList.toggle('active');
+});
+
+mcpApplyConfigButton.addEventListener('click', () => {
+    mcpConfigContainer.classList.toggle('active');
+    mcpConfigToggle.classList.toggle('active');
 });
 
 exportLogButton.addEventListener('click', () => {
@@ -136,6 +308,7 @@ let isUsingTool = false;
 
 // Multimodal Client
 const client = new MultimodalLiveClient();
+client.setMCPManager(mcpManager);
 
 /**
  * Logs a message to the UI.
@@ -307,34 +480,16 @@ async function resumeAudioContext() {
  * @returns {Promise<void>}
  */
 async function connectToWebsocket() {
-    if (!apiKeyInput.value) {
-        logMessage('请输入 API 密钥', 'system');
-        return;
-    }
-
-    // Save values to localStorage
-    localStorage.setItem('gemini_api_key', apiKeyInput.value);
-    localStorage.setItem('gemini_voice', voiceSelect.value);
-    localStorage.setItem('gemini_language', languageSelect.value);
-    localStorage.setItem('system_instruction', systemInstructionInput.value);
-
     const config = {
-        model: CONFIG.API.MODEL_NAME,
-        generationConfig: {
-            responseModalities: responseTypeSelect.value,
-            speechConfig: {
-                languageCode: languageSelect.value,
-                voiceConfig: { 
-                    prebuiltVoiceConfig: { 
-                        voiceName: voiceSelect.value    // You can change voice in the config.js file
-                    }
-                }
-            },
-
+        model: "models/gemini-2.0-flash-exp",
+        generation_config: {
+            temperature: 0.9,
+            top_p: 0.95,
+            top_k: 32,
         },
-        systemInstruction: {
+        system_instructions: {
             parts: [{
-                text: systemInstructionInput.value     // You can change system instruction in the config.js file
+                text: systemInstructionInput.value || CONFIG.SYSTEM_INSTRUCTION.TEXT
             }],
         }
     };  
@@ -343,7 +498,7 @@ async function connectToWebsocket() {
         await client.connect(config,apiKeyInput.value);
         isConnected = true;
         await resumeAudioContext();
-        connectButton.textContent = '断开连接';
+        updateConnectButtonText();
         connectButton.classList.add('connected');
         messageInput.disabled = false;
         sendButton.disabled = false;
@@ -356,7 +511,7 @@ async function connectToWebsocket() {
         Logger.error('连接错误:', error);
         logMessage(`连接错误: ${errorMessage}`, 'system');
         isConnected = false;
-        connectButton.textContent = '连接';
+        updateConnectButtonText();
         connectButton.classList.remove('connected');
         messageInput.disabled = true;
         sendButton.disabled = true;
@@ -381,7 +536,7 @@ function disconnectFromWebsocket() {
         isRecording = false;
         updateMicIcon();
     }
-    connectButton.textContent = '连接';
+    updateConnectButtonText();
     connectButton.classList.remove('connected');
     messageInput.disabled = true;
     sendButton.disabled = true;
@@ -500,6 +655,26 @@ connectButton.addEventListener('click', () => {
         connectToWebsocket();
     }
 });
+
+// Function to update connect button text based on screen size
+function updateConnectButtonText() {
+    if (isConnected) {
+        // On mobile devices, use shorter text
+        if (window.innerWidth <= 768) {
+            connectButton.textContent = '断开';
+        } else {
+            connectButton.textContent = '断开连接';
+        }
+    } else {
+        connectButton.textContent = '连接';
+    }
+}
+
+// Update button text on window resize
+window.addEventListener('resize', updateConnectButtonText);
+
+// Initial update
+updateConnectButtonText();
 
 messageInput.disabled = true;
 sendButton.disabled = true;

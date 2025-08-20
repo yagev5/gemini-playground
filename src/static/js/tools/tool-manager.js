@@ -13,7 +13,16 @@ export class ToolManager {
      */
     constructor() {
         this.tools = new Map();
+        this.mcpManager = null;
         this.registerDefaultTools();
+    }
+
+    /**
+     * Sets the MCP manager for integration with MCP services.
+     * @param {MCPManager} mcpManager - The MCP manager instance.
+     */
+    setMCPManager(mcpManager) {
+        this.mcpManager = mcpManager;
     }
 
     /**
@@ -51,6 +60,7 @@ export class ToolManager {
     getToolDeclarations() {
         const allDeclarations = [];
         
+        // Add default tool declarations
         this.tools.forEach((tool, name) => {
             if (tool.getDeclaration) {
                 if (name === 'weather') {
@@ -63,7 +73,63 @@ export class ToolManager {
             }
         });
 
+        // Add MCP service declarations if MCP manager is available
+        if (this.mcpManager) {
+            const enabledServices = this.mcpManager.getEnabledServices();
+            enabledServices.forEach(service => {
+                try {
+                    // Parse the service code to extract declarations
+                    const declarations = this.extractDeclarationsFromCode(service.code);
+                    if (declarations && declarations.length > 0) {
+                        allDeclarations.push({
+                            functionDeclarations: declarations
+                        });
+                    }
+                } catch (error) {
+                    Logger.error(`Failed to extract declarations from MCP service ${service.name}`, error);
+                }
+            });
+        }
+
         return allDeclarations;
+    }
+
+    /**
+     * Extracts tool declarations from MCP service code.
+     * @param {string} code - The MCP service code.
+     * @returns {Array|null} Array of declarations or null if none found.
+     */
+    extractDeclarationsFromCode(code) {
+        try {
+            // Create a function to safely evaluate the code and extract declarations
+            const func = new Function(
+                'declarations',
+                `"use strict";
+                // Mock context for declaration extraction
+                const context = {
+                    tools: {
+                        addDeclaration: (decl) => {
+                            declarations.push(decl);
+                        }
+                    }
+                };
+                
+                // Execute the code in a controlled environment
+                (function() {
+                    ${code}
+                }).call(context);
+                
+                return declarations;`
+            );
+            
+            // Execute the function with an empty declarations array
+            const declarations = [];
+            func(declarations);
+            return declarations.length > 0 ? declarations : null;
+        } catch (error) {
+            Logger.error('Error extracting declarations from MCP code', error);
+            return null;
+        }
     }
 
     /**
@@ -81,6 +147,7 @@ export class ToolManager {
         const { name, args, id } = functionCall;
         Logger.info(`Handling tool call: ${name}`, { args });
 
+        // Check if it's a default tool
         let tool;
         if (name === 'get_weather_on_date') {
             tool = this.tools.get('weather');
@@ -88,29 +155,63 @@ export class ToolManager {
             tool = this.tools.get(name);
         }
 
-        if (!tool) {
-            throw new ApplicationError(
-                `Unknown tool: ${name}`,
-                ErrorCodes.INVALID_PARAMETER
-            );
+        // If it's a default tool, execute it directly
+        if (tool) {
+            try {
+                const result = await tool.execute(args);
+                return {
+                    functionResponses: [{
+                        response: { output: result },
+                        id
+                    }]
+                };
+            } catch (error) {
+                Logger.error(`Tool execution failed: ${name}`, error);
+                return {
+                    functionResponses: [{
+                        response: { error: error.message },
+                        id
+                    }]
+                };
+            }
         }
 
-        try {
-            const result = await tool.execute(args);
-            return {
-                functionResponses: [{
-                    response: { output: result },
-                    id
-                }]
-            };
-        } catch (error) {
-            Logger.error(`Tool execution failed: ${name}`, error);
-            return {
-                functionResponses: [{
-                    response: { error: error.message },
-                    id
-                }]
-            };
+        // If it's not a default tool and we have MCP manager, check MCP services
+        if (this.mcpManager) {
+            try {
+                // Find the service that provides this function
+                const enabledServices = this.mcpManager.getEnabledServices();
+                for (const service of enabledServices) {
+                    // Try to execute the function in this service
+                    const result = await this.mcpManager.executeService(service.id, {
+                        function: name,
+                        args: args
+                    });
+                    
+                    if (result !== undefined) {
+                        return {
+                            functionResponses: [{
+                                response: { output: result },
+                                id
+                            }]
+                        };
+                    }
+                }
+            } catch (error) {
+                Logger.error(`MCP service execution failed for function: ${name}`, error);
+                return {
+                    functionResponses: [{
+                        response: { error: error.message },
+                        id
+                    }]
+                };
+            }
         }
+
+        // If we reach here, the tool is unknown
+        throw new ApplicationError(
+            `Unknown tool: ${name}`,
+            ErrorCodes.INVALID_PARAMETER
+        );
     }
 } 

@@ -178,9 +178,51 @@ body {
 
 #logs-container::-webkit-scrollbar-thumb {
     background-color: var(--primary-color); /* Chrome, Safari, Edge */
-    border-radius: 10px; /* Chrome, Safari, Edge */
+    border-radius: 4px; /* Chrome, Safari, Edge */
     border: 2px solid transparent; /* Chrome, Safari, Edge */
     background-clip: content-box; /* Chrome, Safari, Edge */
+}
+
+/* MCP Config Container Scrollbar */
+#mcp-config-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#mcp-config-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#mcp-config-container::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+}
+
+#mcp-config-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+
+/* MCP Services List Scrollbar */
+.mcp-services-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.mcp-services-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.mcp-services-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    border: 1px solid transparent;
+    background-clip: content-box;
+}
+
+.mcp-services-list {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
 }
 
 .log-entry {
@@ -374,6 +416,221 @@ body {
     color: var(--text-color);
 }
 
+#mcp-config-container h3 {
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-color);
+}
+
+.mcp-services-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-sm);
+    background-color: var(--input-bg);
+}
+
+.mcp-service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--surface-bg);
+    border-radius: 8px;
+    margin-bottom: var(--spacing-sm);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.mcp-service-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mcp-service-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.mcp-service-info {
+    flex-grow: 1;
+    padding-right: var(--spacing-sm);
+}
+
+.mcp-service-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: var(--text-color);
+}
+
+.mcp-service-description {
+    font-size: 14px;
+    color: var(--secondary-text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.no-services {
+    text-align: center;
+    color: var(--secondary-text-color);
+    padding: var(--spacing-md);
+    font-style: italic;
+}
+
+.mcp-service-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.mcp-service-actions button {
+    background: var(--primary-color);
+    border: none;
+    cursor: pointer;
+    color: white;
+    padding: 6px 12px;
+    border-radius: var(--border-radius);
+    transition: all 0.3s ease;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.mcp-service-actions button:hover {
+    background-color: #1c6ef3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mcp-service-actions button.mcp-toggle-service[data-enabled="true"] {
+    background-color: #4caf50; /* Green for enabled */
+}
+
+.mcp-service-actions button.mcp-toggle-service[data-enabled="true"]:hover {
+    background-color: #45a049;
+}
+
+.mcp-service-actions button.mcp-delete-service {
+    background-color: #f44336; /* Red for delete */
+}
+
+.mcp-service-actions button.mcp-delete-service:hover {
+    background-color: #d32f2f;
+}
+
+.mcp-service-form {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}
+
+.mcp-service-form .input-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.mcp-service-form label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.mcp-service-form input,
+.mcp-service-form textarea {
+    width: 100%;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.mcp-service-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.mcp-service-form #mcp-service-code {
+    min-height: 150px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+}
+
+.code-validation {
+    margin-top: 4px;
+    font-size: 13px;
+}
+
+.code-validation.valid {
+    color: #4caf50;
+}
+
+.code-validation.invalid {
+    color: #f44336;
+}
+
+/* MCP Button Styles */
+#mcp-config-container .button-group {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+#mcp-config-container button {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: var(--border-radius);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-size: 14px;
+}
+
+#mcp-config-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#mcp-config-container button:active {
+    transform: translateY(0);
+}
+
+#mcp-save-service {
+    background-color: #4caf50; /* Green for save */
+}
+
+#mcp-save-service:hover {
+    background-color: #45a049;
+}
+
+#mcp-cancel-edit {
+    background-color: #f44336; /* Red for cancel */
+}
+
+#mcp-cancel-edit:hover {
+    background-color: #d32f2f;
+}
+
+#mcp-config-container #apply-mcp-config {
+    width: 100%;
+    padding: 10px;
+    margin-top: var(--spacing-lg);
+    font-size: 15px;
+    background-color: var(--primary-color);
+}
+
+#mcp-config-container #apply-mcp-config:hover {
+    background-color: #1c6ef3;
+}
+
 .setting-container {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -455,6 +712,10 @@ body {
     background-color: #6c757d;
 }
 
+#export-log:hover {
+    background-color: #5a6268;
+}
+
 .config-section .input-group {
     display: flex;
     gap: var(--spacing-sm);
@@ -493,12 +754,7 @@ body {
     transform: translateY(-1px);
 }
 
-#mcp-config-container #apply-mcp-config {
-    width: 100%;
-    padding: var(--spacing-md);
-    margin-top: var(--spacing-lg);
-    font-size: 16px;
-}
+
 
 /* Video & Screen Share (keep minimal for now) */
 #video-container, #screen-container {
@@ -543,6 +799,10 @@ body {
     #connect-button {
         padding: 6px 10px; /* 进一步缩小移动端按钮内边距 */
         font-size: 12px; /* 进一步缩小移动端按钮字体大小 */
+        white-space: normal; /* 允许文本换行 */
+        line-height: 1.2; /* 调整行高 */
+        text-align: center; /* 文本居中 */
+        min-width: 50px; /* 设置最小宽度 */
     }
 
     #logs-container {

@@ -14,6 +14,13 @@ B站，YouTube，抖音，公众号 全网同名。转载请注明作者。
 对Gemini Chat API 进行了格式转换，中转为更通用的OpenAI格式，国内直连可用。
 可对接AI编程，接入ChatBox等AI客户端。
 
+### 新增MCP（Model Context Protocol）功能
+支持自定义MCP服务，可以轻松扩展模型功能：
+- 通过Web界面添加、编辑、删除MCP服务
+- 单独启用/禁用特定MCP服务
+- 粘贴MCP代码即可使用
+- 代码验证和错误提示
+
 ## Deno部署（推荐）
 
 0. 准备一个Gemini API Key [https://aistudio.google.com](https://aistudio.google.com)（免费）
