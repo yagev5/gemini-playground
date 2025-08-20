@@ -1,3 +1,16 @@
+// Simple logging utility
+const log = {
+  info: (...args: any[]) => {
+    console.log('[INFO]', ...args);
+  },
+  error: (...args: any[]) => {
+    console.error('[ERROR]', ...args);
+  },
+  debug: (...args: any[]) => {
+    console.debug('[DEBUG]', ...args);
+  }
+};
+
 const getContentType = (path: string): string => {
   const ext = path.split('.').pop()?.toLowerCase() || '';
   const types: Record<string, string> = {
@@ -19,19 +32,19 @@ async function handleWebSocket(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const targetUrl = `wss://generativelanguage.googleapis.com${url.pathname}${url.search}`;
   
-  console.log('Target URL:', targetUrl);
+  log.info('Target URL:', targetUrl);
   
   const pendingMessages: string[] = [];
   const targetWs = new WebSocket(targetUrl);
   
   targetWs.onopen = () => {
-    console.log('Connected to Gemini');
+    log.info('Connected to Gemini');
     pendingMessages.forEach(msg => targetWs.send(msg));
     pendingMessages.length = 0;
   };
 
   clientWs.onmessage = (event) => {
-    console.log('Client message received');
+    log.debug('Client message received');
     if (targetWs.readyState === WebSocket.OPEN) {
       targetWs.send(event.data);
     } else {
@@ -40,28 +53,28 @@ async function handleWebSocket(req: Request): Promise<Response> {
   };
 
   targetWs.onmessage = (event) => {
-    console.log('Gemini message received');
+    log.debug('Gemini message received');
     if (clientWs.readyState === WebSocket.OPEN) {
       clientWs.send(event.data);
     }
   };
 
   clientWs.onclose = (event) => {
-    console.log('Client connection closed');
+    log.info('Client connection closed');
     if (targetWs.readyState === WebSocket.OPEN) {
       targetWs.close(1000, event.reason);
     }
   };
 
   targetWs.onclose = (event) => {
-    console.log('Gemini connection closed');
+    log.info('Gemini connection closed');
     if (clientWs.readyState === WebSocket.OPEN) {
       clientWs.close(event.code, event.reason);
     }
   };
 
   targetWs.onerror = (error) => {
-    console.error('Gemini WebSocket error:', error);
+    log.error('Gemini WebSocket error:', error);
   };
 
   return response;
@@ -72,7 +85,7 @@ async function handleAPIRequest(req: Request): Promise<Response> {
     const worker = await import('./api_proxy/worker.mjs');
     return await worker.default.fetch(req);
   } catch (error) {
-    console.error('API request error:', error);
+    log.error('API request error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorStatus = (error as { status?: number }).status || 500;
     return new Response(errorMessage, {
@@ -86,7 +99,7 @@ async function handleAPIRequest(req: Request): Promise<Response> {
 
 async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
-  console.log('Request URL:', req.url);
+  log.info('Request URL:', req.url);
 
   // WebSocket 处理
   if (req.headers.get("Upgrade")?.toLowerCase() === "websocket") {
@@ -99,7 +112,7 @@ async function handleRequest(req: Request): Promise<Response> {
     return handleAPIRequest(req);
   }
 
-  // 静态文件处理
+  // 静态文件处理 (Deno环境)
   try {
     let filePath = url.pathname;
     if (filePath === '/' || filePath === '/index.html') {
@@ -117,7 +130,7 @@ async function handleRequest(req: Request): Promise<Response> {
       },
     });
   } catch (e) {
-    console.error('Error details:', e);
+    log.error('Error details:', e);
     return new Response('Not Found', { 
       status: 404,
       headers: {

@@ -15,6 +15,7 @@ Compatible with AI programming, can be integrated with ChatBox and other AI clie
 
 ## Deno Deployment (Recommended)
 
+0. Prepare a Gemini API Key [https://aistudio.google.com](https://aistudio.google.com) (Free)
 1. [Fork](https://github.com/tech-shrimp/gemini-playground/fork) this project
 2. Login/Register at https://dash.deno.com/
 3. Create a project at https://dash.deno.com/new_project
@@ -31,6 +32,8 @@ Compatible with AI programming, can be integrated with ChatBox and other AI clie
 ## Cloudflare Worker Deployment
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tech-shrimp/gemini-playground)
+
+0. Prepare a Gemini API Key [https://aistudio.google.com](https://aistudio.google.com) (Free)
 1. Click the deploy button
 2. Login to your Cloudflare account
 3. Enter Account ID and API Token
@@ -69,17 +72,16 @@ The three buttons are for:
 
 ### API Proxy
 The API has been proxied to OpenAI format and can be used directly with OpenAI format API.
+Accessible from any region/network environment, no VPN required.
 Remember to replace the domain and Gemini API Key.
 
-### Curl:
-
-Available models:
+#### Available models:
 ```
 curl --location 'http://your.domain.com/v1/models' \
 --header 'Authorization: Bearer YOUR-GEMINI-API-KEY'
 ```
 
-Chat:
+#### Chat:
 ```
 curl --location 'https://your.domain.com/v1/chat/completions' \
 --header 'Authorization: Bearer YOUR-GEMINI-API-KEY' \
@@ -126,4 +128,4 @@ Gemini to OpenAI format conversion:
 Author: PublicAffairs
 Project: https://github.com/PublicAffairs/openai-gemini
 MIT License : https://github.com/PublicAffairs/openai-gemini/blob/main/LICENSE
-``` 
+```

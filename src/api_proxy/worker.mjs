@@ -4,35 +4,116 @@
 
 import { Buffer } from "node:buffer";
 
+// Error types
+class HttpError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = this.constructor.name;
+    this.status = status;
+  }
+}
+
+class NetworkError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = this.constructor.name;
+    this.status = status;
+  }
+}
+
+class AuthenticationError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = this.constructor.name;
+    this.status = status;
+  }
+}
+
+class ServerError extends Error {
+  constructor(message, status) {
+    super(message);
+    this.name = this.constructor.name;
+    this.status = status;
+  }
+}
+
+// Error handler
+const errHandler = (err) => {
+  console.error('[API_PROXY_ERROR]', err);
+  
+  // Classify errors
+  let status = err.status || 500;
+  let message = err.message || 'Unknown error occurred';
+  
+  if (err instanceof HttpError) {
+    // HTTP errors (400-499)
+    status = err.status;
+    message = err.message;
+  } else if (err instanceof NetworkError) {
+    // Network errors
+    status = err.status;
+    message = `Network error: ${err.message}`;
+  } else if (err instanceof AuthenticationError) {
+    // Authentication errors (401, 403)
+    status = err.status;
+    message = `Authentication error: ${err.message}`;
+  } else if (err instanceof ServerError) {
+    // Server errors (500-599)
+    status = err.status;
+    message = `Server error: ${err.message}`;
+  } else if (err.name === 'TypeError' && err.message.includes('fetch')) {
+    // Network-related errors
+    status = 502; // Bad Gateway
+    message = 'Network error: Unable to connect to upstream service';
+  }
+  
+  return new Response(JSON.stringify({
+    error: {
+      message: message,
+      type: err.name || 'UnknownError',
+      code: status
+    }
+  }), fixCors({ 
+    status: status,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }));
+};
+
 export default {
   async fetch (request) {
     if (request.method === "OPTIONS") {
       return handleOPTIONS();
     }
-    const errHandler = (err) => {
-      console.error(err);
-      return new Response(err.message, fixCors({ status: err.status ?? 500 }));
-    };
+    
     try {
       const auth = request.headers.get("Authorization");
       const apiKey = auth?.split(" ")[1];
-      const assert = (success) => {
+      
+      // Check API key
+      if (!apiKey) {
+        throw new AuthenticationError("API key is required", 401);
+      }
+      
+      const assert = (success, message = "The specified HTTP method is not allowed for the requested resource", status = 400) => {
         if (!success) {
-          throw new HttpError("The specified HTTP method is not allowed for the requested resource", 400);
+          throw new HttpError(message, status);
         }
       };
+      
       const { pathname } = new URL(request.url);
       switch (true) {
         case pathname.endsWith("/chat/completions"):
-          assert(request.method === "POST");
+          assert(request.method === "POST", "Method not allowed", 405);
           return handleCompletions(await request.json(), apiKey)
             .catch(errHandler);
         case pathname.endsWith("/embeddings"):
-          assert(request.method === "POST");
+          assert(request.method === "POST", "Method not allowed", 405);
           return handleEmbeddings(await request.json(), apiKey)
             .catch(errHandler);
         case pathname.endsWith("/models"):
-          assert(request.method === "GET");
+          assert(request.method === "GET", "Method not allowed", 405);
           return handleModels(apiKey)
             .catch(errHandler);
         default:
@@ -43,14 +124,6 @@ export default {
     }
   }
 };
-
-class HttpError extends Error {
-  constructor(message, status) {
-    super(message);
-    this.name = this.constructor.name;
-    this.status = status;
-  }
-}
 
 const fixCors = ({ headers, status, statusText }) => {
   headers = new Headers(headers);
@@ -79,10 +152,44 @@ const makeHeaders = (apiKey, more) => ({
   ...more
 });
 
+// Helper function to handle upstream API responses
+const handleUpstreamResponse = async (response, endpoint) => {
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `Upstream API error (${response.status}): ${response.statusText}`;
+    
+    try {
+      const errorJson = JSON.parse(errorText);
+      if (errorJson.error && errorJson.error.message) {
+        errorMessage = errorJson.error.message;
+      }
+    } catch (e) {
+      // If parsing fails, use the raw error text
+      if (errorText) {
+        errorMessage = errorText;
+      }
+    }
+    
+    // Classify errors based on status code
+    if (response.status === 401 || response.status === 403) {
+      throw new AuthenticationError(errorMessage, response.status);
+    } else if (response.status >= 500) {
+      throw new ServerError(errorMessage, response.status);
+    } else {
+      throw new HttpError(errorMessage, response.status);
+    }
+  }
+  return response;
+};
+
 async function handleModels (apiKey) {
   const response = await fetch(`${BASE_URL}/${API_VERSION}/models`, {
     headers: makeHeaders(apiKey),
   });
+  
+  // Handle upstream errors
+  await handleUpstreamResponse(response, 'models');
+  
   let { body } = response;
   if (response.ok) {
     const { models } = JSON.parse(await response.text());
@@ -125,6 +232,10 @@ async function handleEmbeddings (req, apiKey) {
       }))
     })
   });
+  
+  // Handle upstream errors
+  await handleUpstreamResponse(response, 'embeddings');
+  
   let { body } = response;
   if (response.ok) {
     const { embeddings } = JSON.parse(await response.text());
@@ -163,6 +274,9 @@ async function handleCompletions (req, apiKey) {
     body: JSON.stringify(await transformRequest(req)), // try
   });
 
+  // Handle upstream errors
+  await handleUpstreamResponse(response, 'completions');
+  
   let body = response.body;
   if (response.ok) {
     let id = generateChatcmplId(); //"chatcmpl-8pMMaqXMK68B3nyDBrapTDrhkHBQK";
@@ -248,17 +362,21 @@ const parseImg = async (url) => {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`${response.status} ${response.statusText} (${url})`);
+        throw new HttpError(`${response.status} ${response.statusText} (${url})`, response.status);
       }
       mimeType = response.headers.get("content-type");
       data = Buffer.from(await response.arrayBuffer()).toString("base64");
     } catch (err) {
-      throw new Error("Error fetching image: " + err.toString());
+      // Classify network errors
+      if (err.name === 'TypeError' && err.message.includes('fetch')) {
+        throw new NetworkError("Network error when fetching image: " + err.toString(), 502);
+      }
+      throw new HttpError("Error fetching image: " + err.toString(), 400);
     }
   } else {
     const match = url.match(/^data:(?<mimeType>.*?)(;base64)?,(?<data>.*)$/);
     if (!match) {
-      throw new Error("Invalid image data: " + url);
+      throw new HttpError("Invalid image data: " + url, 400);
     }
     ({ mimeType, data } = match.groups);
   }

@@ -1,5 +1,18 @@
 const assetManifest = {};
 
+// Simple logging utility
+const log = {
+  info: (...args) => {
+    console.log('[INFO]', ...args);
+  },
+  error: (...args) => {
+    console.error('[ERROR]', ...args);
+  },
+  debug: (...args) => {
+    console.debug('[DEBUG]', ...args);
+  }
+};
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -16,28 +29,62 @@ export default {
       return handleAPIRequest(request, env);
     }
 
-    // 处理静态资源
+    // 处理静态资源 (兼容Deno和Cloudflare Workers)
     if (url.pathname === '/' || url.pathname === '/index.html') {
-      console.log('Serving index.html',env);
-      return new Response(await env.__STATIC_CONTENT.get('index.html'), {
-        headers: {
-          'content-type': 'text/html;charset=UTF-8',
-        },
-      });
+      log.info('Serving index.html');
+      // 检查是否在Cloudflare Workers环境中
+      if (env && env.__STATIC_CONTENT) {
+        // Cloudflare Workers环境
+        return new Response(await env.__STATIC_CONTENT.get('index.html'), {
+          headers: {
+            'content-type': 'text/html;charset=UTF-8',
+          },
+        });
+      } else {
+        // Deno环境或其他环境
+        try {
+          const fullPath = `${Deno.cwd()}/src/static/index.html`;
+          const file = await Deno.readFile(fullPath);
+          return new Response(file, {
+            headers: {
+              'content-type': 'text/html;charset=UTF-8',
+            },
+          });
+        } catch (e) {
+          log.error('Error reading index.html:', e);
+          return new Response('Not Found', { status: 404 });
+        }
+      }
     }
 
-    // 处理其他静态资源
-    const asset = await env.__STATIC_CONTENT.get(url.pathname.slice(1));
-    if (asset) {
-      const contentType = getContentType(url.pathname);
-      return new Response(asset, {
-        headers: {
-          'content-type': contentType,
-        },
-      });
+    // 处理其他静态资源 (兼容Deno和Cloudflare Workers)
+    // 检查是否在Cloudflare Workers环境中
+    if (env && env.__STATIC_CONTENT) {
+      // Cloudflare Workers环境
+      const asset = await env.__STATIC_CONTENT.get(url.pathname.slice(1));
+      if (asset) {
+        const contentType = getContentType(url.pathname);
+        return new Response(asset, {
+          headers: {
+            'content-type': contentType,
+          },
+        });
+      }
+    } else {
+      // Deno环境或其他环境
+      try {
+        const fullPath = `${Deno.cwd()}/src/static${url.pathname}`;
+        const file = await Deno.readFile(fullPath);
+        const contentType = getContentType(url.pathname);
+        return new Response(file, {
+          headers: {
+            'content-type': `${contentType};charset=UTF-8`,
+          },
+        });
+      } catch (e) {
+        // 文件未找到，继续执行
+      }
     }
-
-
 
     return new Response('Not found', { status: 404 });
   },
@@ -59,122 +106,109 @@ function getContentType(path) {
 }
 
 async function handleWebSocket(request, env) {
-
-
   if (request.headers.get("Upgrade") !== "websocket") {
-		return new Response("Expected WebSocket connection", { status: 400 });
-	}
+    return new Response("Expected WebSocket connection", { status: 400 });
+  }
   
-	const url = new URL(request.url);
-	const pathAndQuery = url.pathname + url.search;
-	const targetUrl = `wss://generativelanguage.googleapis.com${pathAndQuery}`;
-	  
-	console.log('Target URL:', targetUrl);
+  const url = new URL(request.url);
+  const pathAndQuery = url.pathname + url.search;
+  const targetUrl = `wss://generativelanguage.googleapis.com${pathAndQuery}`;
+  
+  log.info('Target URL:', targetUrl);
   
   const [client, proxy] = new WebSocketPair();
   proxy.accept();
   
-   // 用于存储在连接建立前收到的消息
-   let pendingMessages = [];
-  
-   const targetWebSocket = new WebSocket(targetUrl);
+  // 用于存储在连接建立前收到的消息
+  let pendingMessages = [];
+  const targetWebSocket = new WebSocket(targetUrl);
  
-   console.log('Initial targetWebSocket readyState:', targetWebSocket.readyState);
+  log.debug('Initial targetWebSocket readyState:', targetWebSocket.readyState);
  
-   targetWebSocket.addEventListener("open", () => {
-     console.log('Connected to target server');
-     console.log('targetWebSocket readyState after open:', targetWebSocket.readyState);
-     
-     // 连接建立后，发送所有待处理的消息
-     console.log(`Processing ${pendingMessages.length} pending messages`);
-     for (const message of pendingMessages) {
+  targetWebSocket.addEventListener("open", () => {
+    log.info('Connected to target server');
+    log.debug('targetWebSocket readyState after open:', targetWebSocket.readyState);
+    
+    // 连接建立后，发送所有待处理的消息
+    log.debug(`Processing ${pendingMessages.length} pending messages`);
+    for (const message of pendingMessages) {
       try {
         targetWebSocket.send(message);
-        console.log('Sent pending message:', message);
+        log.debug('Sent pending message');
       } catch (error) {
-        console.error('Error sending pending message:', error);
+        log.error('Error sending pending message:', error);
       }
-     }
-     pendingMessages = []; // 清空待处理消息队列
-   });
+    }
+    pendingMessages = []; // 清空待处理消息队列
+  });
  
-   proxy.addEventListener("message", async (event) => {
-     console.log('Received message from client:', {
-       dataPreview: typeof event.data === 'string' ? event.data.slice(0, 200) : 'Binary data',
-       dataType: typeof event.data,
-       timestamp: new Date().toISOString()
-     });
-     
-     console.log("targetWebSocket.readyState"+targetWebSocket.readyState)
-     if (targetWebSocket.readyState === WebSocket.OPEN) {
-        try {
-          targetWebSocket.send(event.data);
-          console.log('Successfully sent message to gemini');
-        } catch (error) {
-          console.error('Error sending to gemini:', error);
-        }
-     } else {
-       // 如果连接还未建立，将消息加入待处理队列
-       console.log('Connection not ready, queueing message');
-       pendingMessages.push(event.data);
-     }
-   });
+  proxy.addEventListener("message", async (event) => {
+    log.debug('Received message from client');
+    
+    if (targetWebSocket.readyState === WebSocket.OPEN) {
+      try {
+        targetWebSocket.send(event.data);
+        log.debug('Successfully sent message to gemini');
+      } catch (error) {
+        log.error('Error sending to gemini:', error);
+      }
+    } else {
+      // 如果连接还未建立，将消息加入待处理队列
+      log.debug('Connection not ready, queueing message');
+      pendingMessages.push(event.data);
+    }
+  });
  
-   targetWebSocket.addEventListener("message", (event) => {
-     console.log('Received message from gemini:', {
-     dataPreview: typeof event.data === 'string' ? event.data.slice(0, 200) : 'Binary data',
-     dataType: typeof event.data,
-     timestamp: new Date().toISOString()
-     });
-     
-     try {
-     if (proxy.readyState === WebSocket.OPEN) {
-       proxy.send(event.data);
-       console.log('Successfully forwarded message to client');
-     }
-     } catch (error) {
-     console.error('Error forwarding to client:', error);
-     }
-   });
+  targetWebSocket.addEventListener("message", (event) => {
+    log.debug('Received message from gemini');
+    
+    try {
+      if (proxy.readyState === WebSocket.OPEN) {
+        proxy.send(event.data);
+        log.debug('Successfully forwarded message to client');
+      }
+    } catch (error) {
+      log.error('Error forwarding to client:', error);
+    }
+  });
  
-   targetWebSocket.addEventListener("close", (event) => {
-     console.log('Gemini connection closed:', {
-     code: event.code,
-     reason: event.reason || 'No reason provided',
-     wasClean: event.wasClean,
-     timestamp: new Date().toISOString(),
-     readyState: targetWebSocket.readyState
-     });
-     if (proxy.readyState === WebSocket.OPEN) {
-     proxy.close(event.code, event.reason);
-     }
-   });
+  targetWebSocket.addEventListener("close", (event) => {
+    log.info('Gemini connection closed:', {
+      code: event.code,
+      reason: event.reason || 'No reason provided',
+      wasClean: event.wasClean,
+      timestamp: new Date().toISOString(),
+      readyState: targetWebSocket.readyState
+    });
+    if (proxy.readyState === WebSocket.OPEN) {
+      proxy.close(event.code, event.reason);
+    }
+  });
  
-   proxy.addEventListener("close", (event) => {
-     console.log('Client connection closed:', {
-     code: event.code,
-     reason: event.reason || 'No reason provided',
-     wasClean: event.wasClean,
-     timestamp: new Date().toISOString()
-     });
-     if (targetWebSocket.readyState === WebSocket.OPEN) {
-     targetWebSocket.close(event.code, event.reason);
-     }
-   });
+  proxy.addEventListener("close", (event) => {
+    log.info('Client connection closed:', {
+      code: event.code,
+      reason: event.reason || 'No reason provided',
+      wasClean: event.wasClean,
+      timestamp: new Date().toISOString()
+    });
+    if (targetWebSocket.readyState === WebSocket.OPEN) {
+      targetWebSocket.close(event.code, event.reason);
+    }
+  });
  
-   targetWebSocket.addEventListener("error", (error) => {
-     console.error('Gemini WebSocket error:', {
-     error: error.message || 'Unknown error',
-     timestamp: new Date().toISOString(),
-     readyState: targetWebSocket.readyState
-     });
-   });
+  targetWebSocket.addEventListener("error", (error) => {
+    log.error('Gemini WebSocket error:', {
+      error: error.message || 'Unknown error',
+      timestamp: new Date().toISOString(),
+      readyState: targetWebSocket.readyState
+    });
+  });
 
- 
-   return new Response(null, {
-   status: 101,
-   webSocket: client,
-   });
+  return new Response(null, {
+    status: 101,
+    webSocket: client,
+  });
 }
 
 async function handleAPIRequest(request, env) {
@@ -182,7 +216,7 @@ async function handleAPIRequest(request, env) {
     const worker = await import('./api_proxy/worker.mjs');
     return await worker.default.fetch(request);
   } catch (error) {
-    console.error('API request error:', error);
+    log.error('API request error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     const errorStatus = error.status || 500;
     return new Response(errorMessage, {
