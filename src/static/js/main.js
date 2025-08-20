@@ -480,16 +480,33 @@ async function resumeAudioContext() {
  * @returns {Promise<void>}
  */
 async function connectToWebsocket() {
+    if (!apiKeyInput.value) {
+        logMessage('请输入 API 密钥', 'system');
+        return;
+    }
+
+    // Save values to localStorage
+    localStorage.setItem('gemini_api_key', apiKeyInput.value);
+    localStorage.setItem('gemini_voice', voiceSelect.value);
+    localStorage.setItem('gemini_language', languageSelect.value);
+    localStorage.setItem('system_instruction', systemInstructionInput.value);
+
     const config = {
-        model: "models/gemini-2.0-flash-exp",
-        generation_config: {
-            temperature: 0.9,
-            top_p: 0.95,
-            top_k: 32,
+        model: CONFIG.API.MODEL_NAME,
+        generationConfig: {
+            responseModalities: responseTypeSelect.value,
+            speechConfig: {
+                languageCode: languageSelect.value,
+                voiceConfig: { 
+                    prebuiltVoiceConfig: { 
+                        voiceName: voiceSelect.value    // You can change voice in the config.js file
+                    }
+                }
+            },
         },
-        system_instructions: {
+        systemInstruction: {
             parts: [{
-                text: systemInstructionInput.value || CONFIG.SYSTEM_INSTRUCTION.TEXT
+                text: systemInstructionInput.value     // You can change system instruction in the config.js file
             }],
         }
     };  
