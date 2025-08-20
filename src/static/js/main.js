@@ -109,20 +109,7 @@ applyConfigButton.addEventListener('click', () => {
 });
 
 exportLogButton.addEventListener('click', () => {
-    const logs = [];
-    logsContainer.querySelectorAll('.log-entry').forEach(logEntry => {
-        const timestamp = logEntry.querySelector('.timestamp').textContent;
-        const emoji = logEntry.querySelector('.emoji').textContent;
-        const message = logEntry.querySelector('span:not(.timestamp):not(.emoji)').textContent;
-        logs.push(`[${timestamp}] ${emoji} ${message}`);
-    });
-    const blob = new Blob([logs.join('\n')], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'logs.txt';
-    a.click();
-    URL.revokeObjectURL(url);
+    Logger.export();
 });
 
 if ('serviceWorker' in navigator) {
